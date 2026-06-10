@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 const db = new sqlite.Database('./database.sqlite');
 
-// Funzione helper per creare le password
+// create pw helper
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 32).toString('hex');
@@ -17,7 +17,7 @@ const users = [
 ];
 
 db.serialize(() => {
-  // 1. Creazione Tabelle
+  //create tables
   db.run(`DROP TABLE IF EXISTS games`);
   db.run(`DROP TABLE IF EXISTS events`);
   db.run(`DROP TABLE IF EXISTS segments`);
@@ -67,7 +67,7 @@ db.serialize(() => {
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
 
-  // 2. Inserimento Utenti
+  //insert users
   const stmtUser = db.prepare('INSERT INTO users (username, salt, hash) VALUES (?, ?, ?)');
   users.forEach(u => {
     const { salt, hash } = hashPassword(u.password);
@@ -75,17 +75,17 @@ db.serialize(() => {
   });
   stmtUser.finalize();
 
-  // 3. Inserimento Linee
+  //insert lines
   const lines = ['Linea Rossa', 'Linea Blu', 'Linea Verde', 'Linea Gialla'];
   const stmtLine = db.prepare('INSERT INTO lines (name) VALUES (?)');
   lines.forEach(l => stmtLine.run(l));
   stmtLine.finalize();
 
-  // 4. Inserimento Stazioni (12 totali, 3 interscambi)
+  // insert stations
   const stations = [
-    { name: 'Centrale', int: 1 },         // 1 - Interscambio
-    { name: 'Porta Velaria', int: 1 },    // 2 - Interscambio
-    { name: 'Fontana Oscura', int: 1 },   // 3 - Interscambio
+    { name: 'Centrale', int: 1 },         // 1 Interscambio
+    { name: 'Porta Velaria', int: 1 },    // 2 Interscambio
+    { name: 'Fontana Oscura', int: 1 },   // 3 Interscambio
     { name: 'Crocevia del Falco', int: 0 },// 4
     { name: 'Piazza Lanterne', int: 0 },  // 5
     { name: 'Borgo Sereno', int: 0 },     // 6
@@ -100,7 +100,7 @@ db.serialize(() => {
   stations.forEach(s => stmtStation.run(s.name, s.int));
   stmtStation.finalize();
 
-  // 5. Inserimento Segmenti
+  //insert segments
   const segments = [
     // Rossa (1-2, 2-4, 4-5)
     [1, 2, 1], [2, 4, 1], [4, 5, 1],
@@ -115,7 +115,7 @@ db.serialize(() => {
   segments.forEach(seg => stmtSegment.run(seg[0], seg[1], seg[2]));
   stmtSegment.finalize();
 
-  // 6. Inserimento 8 Eventi (effetti da -4 a +4)
+  //insert events
   const events = [
     { desc: 'Viaggio tranquillo', eff: 0 },
     { desc: 'Carrozza affollata', eff: -1 },
@@ -130,7 +130,7 @@ db.serialize(() => {
   events.forEach(e => stmtEvent.run(e.desc, e.eff));
   stmtEvent.finalize();
 
-  // 7. Inserimento Partite (2 utenti hanno giocato)
+  // insert games
   const stmtGame = db.prepare('INSERT INTO games (user_id, score, date) VALUES (?, ?, ?)');
   stmtGame.run(1, 15, new Date().toISOString());
   stmtGame.run(1, 8, new Date().toISOString());
