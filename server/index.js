@@ -95,6 +95,83 @@ app.delete('/api/sessions/current', (req, res) => {
 });
 
 
+// block session if not logged
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ error: 'Non autorizzato: devi fare il login' });
+};
+
+
+//games data API
+
+// getstations
+app.get('/api/stations', isLoggedIn, async (req, res) => {
+  try {
+    const stations = await gameDao.getStations();
+    res.json(stations);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero delle stazioni' });
+  }
+});
+
+// get lines
+app.get('/api/lines', isLoggedIn, async (req, res) => {
+  try {
+    const lines = await gameDao.getLines();
+    res.json(lines);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero delle linee' });
+  }
+});
+
+// get segments
+app.get('/api/segments', isLoggedIn, async (req, res) => {
+  try {
+    const segments = await gameDao.getSegments();
+    res.json(segments);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero dei segmenti' });
+  }
+});
+
+// get events
+app.get('/api/events', isLoggedIn, async (req, res) => {
+  try {
+    const events = await gameDao.getEvents();
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero degli eventi' });
+  }
+});
+
+// save result
+app.post('/api/games', isLoggedIn, async (req, res) => {
+  try {
+    const { score } = req.body;
+    
+    // Validazione base richiesta dalle specifiche
+    if (score === undefined || typeof score !== 'number') {
+      return res.status(400).json({ error: 'Punteggio mancante o non valido' });
+    }
+
+    const result = await gameDao.saveGame(req.user.id, score);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel salvataggio della partita' });
+  }
+});
+
+//get laderboard
+app.get('/api/ranking', isLoggedIn, async (req, res) => {
+  try {
+    const ranking = await gameDao.getRanking();
+    res.json(ranking);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore nel recupero della classifica' });
+  }
+});
 
 
 app.listen(port, () => {
