@@ -4,8 +4,7 @@ import cors from "cors";
 import session from "express-session";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import * as userDao from './dao/user-dao.js';
-import * as gameDao from './dao/game-dao.js';
+import * as dao from './dao.js';
 
 const app = express();
 const port = 3001;
@@ -23,7 +22,7 @@ app.use(cors(corsOptions));
 passport.use(new LocalStrategy(
   async function(username, password, done) {
     try {
-      const user = await userDao.getUser(username, password);
+      const user = await dao.getUser(username, password);
       if (!user) {
         return done(null, false, { message: 'Username o password errati.' });
       }
@@ -34,15 +33,13 @@ passport.use(new LocalStrategy(
   }
 ));
 
-// save user
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// get the user session
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await userDao.getUserById(id);
+    const user = await dao.getUserById(id);
     done(null, user);
   } catch (err) {
     done(err, null);
@@ -90,7 +87,7 @@ app.get('/api/sessions/current', (req, res) => {
 //logout
 app.delete('/api/sessions/current', (req, res) => {
   req.logout(() => {
-    res.end(); // Risponde con 200 OK vuoto quando il logout ha successo
+    res.end();
   });
 });
 
@@ -106,73 +103,59 @@ const isLoggedIn = (req, res, next) => {
 
 //games data API
 
-// getstations
 app.get('/api/stations', isLoggedIn, async (req, res) => {
   try {
-    const stations = await gameDao.getStations();
+    const stations = await dao.getStations();
     res.json(stations);
   } catch (err) {
     res.status(500).json({ error: 'Errore nel recupero delle stazioni' });
   }
 });
 
-// get lines
 app.get('/api/lines', isLoggedIn, async (req, res) => {
   try {
-    const lines = await gameDao.getLines();
+    const lines = await dao.getLines();
     res.json(lines);
   } catch (err) {
     res.status(500).json({ error: 'Errore nel recupero delle linee' });
   }
 });
 
-// get segments
 app.get('/api/segments', isLoggedIn, async (req, res) => {
   try {
-    const segments = await gameDao.getSegments();
+    const segments = await dao.getSegments();
     res.json(segments);
   } catch (err) {
     res.status(500).json({ error: 'Errore nel recupero dei segmenti' });
   }
 });
 
-// get events
 app.get('/api/events', isLoggedIn, async (req, res) => {
   try {
-    const events = await gameDao.getEvents();
+    const events = await dao.getEvents();
     res.json(events);
   } catch (err) {
     res.status(500).json({ error: 'Errore nel recupero degli eventi' });
   }
 });
 
-// save result
 app.post('/api/games', isLoggedIn, async (req, res) => {
   try {
-    const { score } = req.body;
-    
-    // Validazione base richiesta dalle specifiche
-    if (score === undefined || typeof score !== 'number') {
-      return res.status(400).json({ error: 'Punteggio mancante o non valido' });
-    }
-
-    const result = await gameDao.saveGame(req.user.id, score);
-    res.status(201).json(result);
+    const newGameId = await dao.saveGame(req.user.id, req.body.score);
+    res.status(201).json({ id: newGameId });
   } catch (err) {
     res.status(500).json({ error: 'Errore nel salvataggio della partita' });
   }
 });
 
-//get laderboard
 app.get('/api/ranking', isLoggedIn, async (req, res) => {
   try {
-    const ranking = await gameDao.getRanking();
+    const ranking = await dao.getRanking();
     res.json(ranking);
   } catch (err) {
     res.status(500).json({ error: 'Errore nel recupero della classifica' });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

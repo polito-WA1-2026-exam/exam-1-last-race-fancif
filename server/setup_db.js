@@ -12,8 +12,8 @@ function hashPassword(password) {
 
 const users = [
   { username: 'mario', password: 'password' },
-  { username: 'luigi', password: 'password' },
-  { username: 'peach', password: 'password' }
+  { username: 'luigi', password: 'password123' },
+  { username: 'francesco', password: 'abc123password' }
 ];
 
 db.serialize(() => {
@@ -27,9 +27,9 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    salt TEXT,
-    hash TEXT
+    username TEXT UNIQUE NOT NULL,
+    salt TEXT NOT NULL,
+    password TEXT NOT NULL
   )`);
 
   db.run(`CREATE TABLE stations (
@@ -68,7 +68,7 @@ db.serialize(() => {
   )`);
 
   //insert users
-  const stmtUser = db.prepare('INSERT INTO users (username, salt, hash) VALUES (?, ?, ?)');
+  const stmtUser = db.prepare('INSERT INTO users (username, salt, password) VALUES (?, ?, ?)');
   users.forEach(u => {
     const { salt, hash } = hashPassword(u.password);
     stmtUser.run(u.username, salt, hash);
@@ -76,25 +76,25 @@ db.serialize(() => {
   stmtUser.finalize();
 
   //insert lines
-  const lines = ['Linea Rossa', 'Linea Blu', 'Linea Verde', 'Linea Gialla'];
+  const lines = ['Red Line', 'Blue Line', 'Green Line', 'Yellow Line'];
   const stmtLine = db.prepare('INSERT INTO lines (name) VALUES (?)');
   lines.forEach(l => stmtLine.run(l));
   stmtLine.finalize();
 
   // insert stations
   const stations = [
-    { name: 'Centrale', int: 1 },         // 1 Interscambio
-    { name: 'Porta Velaria', int: 1 },    // 2 Interscambio
-    { name: 'Fontana Oscura', int: 1 },   // 3 Interscambio
-    { name: 'Crocevia del Falco', int: 0 },// 4
-    { name: 'Piazza Lanterne', int: 0 },  // 5
-    { name: 'Borgo Sereno', int: 0 },     // 6
-    { name: 'Viale Mosaici', int: 0 },    // 7
-    { name: 'Torre Cinerea', int: 0 },    // 8
-    { name: 'Campo Eco', int: 0 },        // 9
-    { name: 'Stazione Nord', int: 0 },    // 10
-    { name: 'Piazza Ovest', int: 0 },     // 11
-    { name: 'Giardini Est', int: 0 }      // 12
+    { name: 'Central', int: 1 },              // 1 Interchange
+    { name: 'Velaria Gate', int: 1 },         // 2 Interchange
+    { name: 'Dark Fountain', int: 1 },        // 3 Interchange
+    { name: 'Falcon Crossroads', int: 0 },    // 4
+    { name: 'Lantern Square', int: 0 },       // 5
+    { name: 'Serene Borough', int: 0 },       // 6
+    { name: 'Mosaic Avenue', int: 0 },        // 7
+    { name: 'Ash Tower', int: 0 },            // 8
+    { name: 'Echo Field', int: 0 },           // 9
+    { name: 'North Station', int: 0 },        // 10
+    { name: 'West Square', int: 0 },          // 11
+    { name: 'East Gardens', int: 0 }          // 12
   ];
   const stmtStation = db.prepare('INSERT INTO stations (name, is_interchange) VALUES (?, ?)');
   stations.forEach(s => stmtStation.run(s.name, s.int));
@@ -117,14 +117,14 @@ db.serialize(() => {
 
   //insert events
   const events = [
-    { desc: 'Viaggio tranquillo', eff: 0 },
-    { desc: 'Carrozza affollata', eff: -1 },
-    { desc: 'Passeggero gentile', eff: 1 },
-    { desc: 'Ritardo del treno', eff: -2 },
-    { desc: 'Trovata una moneta', eff: 2 },
-    { desc: 'Binario sbagliato', eff: -3 },
-    { desc: 'Biglietto fortunato', eff: 3 },
-    { desc: 'Controllore severo', eff: -4 }
+    { desc: 'Smooth journey', eff: 0 },
+    { desc: 'Crowded carriage', eff: -1 },
+    { desc: 'Kind passenger', eff: 1 },
+    { desc: 'Train delay', eff: -2 },
+    { desc: 'Found a coin', eff: 2 },
+    { desc: 'Wrong platform', eff: -3 },
+    { desc: 'Lucky ticket', eff: 3 },
+    { desc: 'Strict inspector', eff: -4 }
   ];
   const stmtEvent = db.prepare('INSERT INTO events (description, effect) VALUES (?, ?)');
   events.forEach(e => stmtEvent.run(e.desc, e.eff));
@@ -137,7 +137,7 @@ db.serialize(() => {
   stmtGame.run(2, 22, new Date().toISOString());
   stmtGame.finalize();
 
-  console.log("Database popolato con successo!");
+  console.log("Database populated successfully");
 });
 
 db.close();

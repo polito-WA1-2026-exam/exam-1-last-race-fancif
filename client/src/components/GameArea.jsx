@@ -9,7 +9,7 @@ function GameArea({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Network Data
+  // network Data
   const [stations, setStations] = useState([]);
   const [lines, setLines] = useState([]);
   const [segments, setSegments] = useState([]);
@@ -23,19 +23,19 @@ function GameArea({ user }) {
   const [submittedRoute, setSubmittedRoute] = useState([]);
   const [finalScore, setFinalScore] = useState(0);
 
-  // Fetch initial data when the component mounts
+  
   useEffect(() => {
     const fetchNetworkData = async () => {
       try {
         const fetchedStations = await API.getStations();
         const fetchedLines = await API.getLines();
         const fetchedSegments = await API.getSegments();
-        const fetchedEvents = await API.getEvents(); // NEW: Fetch events
+        const fetchedEvents = await API.getEvents(); 
         
         setStations(fetchedStations);
         setLines(fetchedLines);
         setSegments(fetchedSegments);
-        setEvents(fetchedEvents); // NEW: Save events to state
+        setEvents(fetchedEvents); 
       } catch (err) {
         setError('Failed to load network data. Please try again.');
       } finally {
@@ -45,22 +45,21 @@ function GameArea({ user }) {
     fetchNetworkData();
   }, []);
 
-  // Helper function to get a station's name by its ID
   const getStationName = (id) => {
     const station = stations.find(s => s.id === id);
     return station ? station.name : 'Unknown';
   };
 
-  // Associa il colore di Bootstrap in base al nome della linea
+
   const getLineColor = (name) => {
-    if (name.includes('Rossa')) return 'linea-rossa text-danger';
-    if (name.includes('Blu')) return 'linea-blu text-primary';
-    if (name.includes('Verde')) return 'linea-verde text-success';
-    if (name.includes('Gialla')) return 'linea-gialla text-warning';
+    if (name.includes('Red')) return 'linea-rossa text-danger';
+    if (name.includes('Blue')) return 'linea-blu text-primary';
+    if (name.includes('Green')) return 'linea-verde text-success';
+    if (name.includes('Yellow')) return 'linea-gialla text-warning';
     return 'text-dark';
   };
 
-  // Handler for when the user submits their route in the Planning Phase
+
   const handleRouteSubmit = (routeSegments, startStation, destStation) => {
     setSubmittedRoute(routeSegments);
     setCurrentMission({ start: startStation, dest: destStation });
@@ -69,7 +68,7 @@ function GameArea({ user }) {
 
   const handleExecutionFinish = async (finalCoins) => {
     const scoreToSave = finalCoins < 0 ? 0 : finalCoins;
-    setFinalScore(scoreToSave); // Salviamo il punteggio nello stato per mostrarlo
+    setFinalScore(scoreToSave); 
     
     try {
       await API.saveGame(scoreToSave);
@@ -80,11 +79,11 @@ function GameArea({ user }) {
   };
 
   const handlePlayAgain = () => {
-    // Resettiamo gli stati della partita precedente
+    // reset status
     setSubmittedRoute([]);
     setCurrentMission(null);
     setFinalScore(0);
-    setGamePhase('SETUP'); // Torniamo alla mappa!
+    setGamePhase('SETUP');
   };
 
   if (loading) return <Spinner animation="border" className="mt-5" />;
@@ -104,7 +103,6 @@ function GameArea({ user }) {
           
           <Row xs={1} md={2} className="g-4">
             {lines.map((line) => {
-              // Filter segments that belong to this specific line
               const lineSegments = segments.filter(seg => seg.line_id === line.id);
               
               return (

@@ -12,7 +12,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // When the app loads, check if the user already has an active session
+  // check if the user already has an active session
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -42,7 +42,7 @@ function App() {
     setUser(null);
   };
 
-  // Show a loading spinner while checking the session
+  // show loading spinner
   if (loading) {
     return (
       <div className="d-flex justify-content-center mt-5">

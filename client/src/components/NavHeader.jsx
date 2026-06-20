@@ -7,13 +7,11 @@ function NavHeader({ loggedIn, user, logout }) {
   return (
     <Navbar bg="dark" data-bs-theme="dark" expand="lg" className="mb-4">
       <Container>
-        {/* The brand logo links to the home page */}
         <Navbar.Brand as={Link} to="/">🚇 Last Race</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
-            {/* Show Ranking link only if the user is logged in */}
             {loggedIn && <Nav.Link as={Link} to="/ranking">Ranking</Nav.Link>}
           </Nav>
           <Nav>
