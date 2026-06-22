@@ -11,8 +11,8 @@ function hashPassword(password) {
 }
 
 const users = [
-  { username: 'mario', password: 'password' },
-  { username: 'luigi', password: 'password123' },
+  { username: 'user', password: 'password' },
+  { username: 'alex', password: 'password123' },
   { username: 'francesco', password: 'abc123password' }
 ];
 

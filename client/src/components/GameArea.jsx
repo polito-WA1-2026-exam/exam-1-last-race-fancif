@@ -13,7 +13,7 @@ function GameArea({ user }) {
   const [stations, setStations] = useState([]);
   const [lines, setLines] = useState([]);
   const [segments, setSegments] = useState([]);
-  const [events, setEvents] = useState([]); // NEW: Added events state
+  const [events, setEvents] = useState([]); 
   
   // Game State: 'SETUP', 'PLANNING', 'EXECUTION', 'RESULT'
   const [gamePhase, setGamePhase] = useState('SETUP');
@@ -50,7 +50,6 @@ function GameArea({ user }) {
     return station ? station.name : 'Unknown';
   };
 
-
   const getLineColor = (name) => {
     if (name.includes('Red')) return 'linea-rossa text-danger';
     if (name.includes('Blue')) return 'linea-blu text-primary';
@@ -58,7 +57,6 @@ function GameArea({ user }) {
     if (name.includes('Yellow')) return 'linea-gialla text-warning';
     return 'text-dark';
   };
-
 
   const handleRouteSubmit = (routeSegments, startStation, destStation) => {
     setSubmittedRoute(routeSegments);
@@ -79,7 +77,6 @@ function GameArea({ user }) {
   };
 
   const handlePlayAgain = () => {
-    // reset status
     setSubmittedRoute([]);
     setCurrentMission(null);
     setFinalScore(0);
@@ -99,6 +96,16 @@ function GameArea({ user }) {
             <Button variant="success" size="lg" onClick={() => setGamePhase('PLANNING')}>
               Start Game
             </Button>
+          </div>
+          
+          {/* IMMAGINE MAPPA COMPLETA */}
+          <div className="text-center mb-5">
+            <img 
+              src="/full_map.png" 
+              alt="Mappa completa della metropolitana" 
+              className="img-fluid rounded shadow-sm border" 
+              style={{ maxHeight: '450px', objectFit: 'contain' }}
+            />
           </div>
           
           <Row xs={1} md={2} className="g-4">

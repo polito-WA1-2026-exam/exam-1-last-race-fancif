@@ -82,66 +82,105 @@ function PlanningPhase({ stations, segments, onSubmitRoute }) {
 
   return (
     <div>
-      <Card className="mb-4 border-primary">
-        <Card.Body className="text-center">
-          <h4>Your Mission</h4>
-          <h2 className="text-primary">
-            {startStation.name} <i className="bi bi-arrow-right"></i> {destStation.name}
-          </h2>
-          <div className="mt-3">
-            <h5>Time Left: <Badge bg={timeLeft > 20 ? "success" : "danger"}>{timeLeft}s</Badge></h5>
-            <ProgressBar animated variant={timeLeft > 20 ? "info" : "danger"} now={(timeLeft / 90) * 100} />
+      {/* MISSION CARD */}
+      <Card className="mb-4 shadow-sm border-primary">
+        <Card.Body className="text-center py-3">
+          <h5 className="text-uppercase text-muted small fw-bold mb-1">Your Mission</h5>
+          <h3 className="text-primary fw-bold mb-2">
+            {startStation.name} <i className="bi bi-arrow-right-circle-fill mx-2 text-secondary"></i> {destStation.name}
+          </h3>
+          <div className="d-flex justify-content-center align-items-center gap-3">
+            <h6 className="mb-0">Time Left: <Badge bg={timeLeft > 20 ? "success" : "danger"} className="px-3 py-2 ms-1">{timeLeft}s</Badge></h6>
+            <ProgressBar animated variant={timeLeft > 20 ? "info" : "danger"} now={(timeLeft / 90) * 100} style={{ height: '8px', width: '200px' }} />
           </div>
         </Card.Body>
       </Card>
 
-      <Row>
-        <Col md={7}>
-          <h5>Available Segments</h5>
-          <p className="text-muted small">Click to add to your route. You have to mentally reconstruct the lines!</p>
-          <div className="d-grid gap-2">
+      {/* MAP & ROUTE*/}
+      <Row className="g-4 mb-4">
+        
+        {/* Colonna Mappa */}
+        <Col lg={8}>
+          <Card className="h-100 shadow-sm border-0 bg-light">
+            <Card.Body className="text-center p-3 d-flex flex-column justify-content-center">
+              <img 
+                src="/hide_map.png" 
+                alt="Mappa con sole fermate" 
+                className="img-fluid rounded shadow-sm border border-3 border-white mx-auto" 
+                style={{ maxHeight: '320px', objectFit: 'contain' }}
+              />
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/* current path*/}
+        <Col lg={4}>
+          <Card className="h-100 shadow-sm border-0 d-flex flex-column">
+            <Card.Body className="d-flex flex-column">
+              <h5 className="mb-3"><i className="bi bi-signpost-split me-2 text-primary"></i>Your Route</h5>
+              
+              <div className="bg-light p-3 rounded flex-grow-1 mb-3 border overflow-auto" style={{ maxHeight: '200px' }}>
+                {selectedSegments.length === 0 ? (
+                  <div className="text-center text-muted h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i className="bi bi-geo-alt fs-2 mb-2 opacity-50"></i>
+                    <p className="mb-0 small">Select segments from the board below.</p>
+                  </div>
+                ) : (
+                  <ol className="ps-3 mb-0 small">
+                    {selectedSegments.map((seg, idx) => (
+                      <li key={idx} className="mb-2 pb-1 border-bottom border-secondary-subtle">
+                        <strong>{getStationName(seg.station_a_id)}</strong> &harr; <strong>{getStationName(seg.station_b_id)}</strong>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+
+              <div className="d-grid mt-auto">
+                <Button 
+                  variant="success" 
+                  size="lg" 
+                  className="rounded-pill fw-bold shadow-sm"
+                  onClick={() => onSubmitRoute(selectedSegments, startStation, destStation)}
+                  disabled={selectedSegments.length === 0}
+                >
+                  <i className="bi bi-train-front-fill me-2"></i> Submit Route
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+
+      </Row>
+
+      {/* CONTROL BOARD (segments) */}
+      <Card className="shadow-sm border-0 mb-4 bg-white">
+        <Card.Body>
+          <h5 className="mb-3"><i className="bi bi-grid-3x3-gap-fill me-2 text-secondary"></i>Available Segments</h5>
+          
+          <Row className="g-2">
             {segments.map(seg => {
               const isSelected = selectedSegments.find(s => s.id === seg.id);
               return (
-                <Button 
-                  key={seg.id} 
-                  variant={isSelected ? "primary" : "outline-secondary"}
-                  onClick={() => toggleSegment(seg)}
-                  className="text-start"
-                >
-                  {isSelected ? <i className="bi bi-check-circle-fill me-2"></i> : <i className="bi bi-circle me-2"></i>}
-                  {getStationName(seg.station_a_id)} &harr; {getStationName(seg.station_b_id)}
-                </Button>
+                <Col xs={12} sm={6} md={4} lg={3} key={seg.id}>
+                  <Button 
+                    variant={isSelected ? "primary" : "outline-secondary"}
+                    onClick={() => toggleSegment(seg)}
+                    className="w-100 text-start rounded-3 px-3 py-2 border-2 shadow-sm d-flex align-items-center"
+                    style={{ transition: 'all 0.2s', fontSize: '0.9rem' }}
+                  >
+                    {isSelected ? <i className="bi bi-check-circle-fill me-2 fs-5"></i> : <i className="bi bi-circle me-2 text-muted"></i>}
+                    <span className={isSelected ? "fw-bold" : ""}>
+                      {getStationName(seg.station_a_id)} &harr; {getStationName(seg.station_b_id)}
+                    </span>
+                  </Button>
+                </Col>
               );
             })}
-          </div>
-        </Col>
-        
-        <Col md={5}>
-          <h5>Your Route</h5>
-          <Card className="bg-light mb-3">
-            <Card.Body>
-              {selectedSegments.length === 0 ? (
-                <p className="text-muted">No segments selected yet.</p>
-              ) : (
-                <ol>
-                  {selectedSegments.map((seg, idx) => (
-                    <li key={idx}>
-                      {getStationName(seg.station_a_id)} &harr; {getStationName(seg.station_b_id)}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </Card.Body>
-          </Card>
-          <div className="d-grid">
-            {}
-            <Button variant="success" size="lg" onClick={() => onSubmitRoute(selectedSegments, startStation, destStation)}>
-              Submit Route Now
-            </Button>
-          </div>
-        </Col>
-      </Row>
+          </Row>
+        </Card.Body>
+      </Card>
+
     </div>
   );
 }

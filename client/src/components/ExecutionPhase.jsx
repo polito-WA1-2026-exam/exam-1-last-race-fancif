@@ -20,26 +20,25 @@ function ExecutionPhase({ stations, route, mission, events, onFinish }) {
       for (let i = 0; i < route.length; i++) {
         const seg = route[i];
 
-        // Rule: Each segment may be selected only once
+        // rule: rach segment may be selected only once
         if (usedSegments.has(seg.id)) return false;
         usedSegments.add(seg.id);
 
-        // Rule: Continuity 
+        // Rule: continuity 
         let nextStationId;
         if (seg.station_a_id === currentStationId) {
           nextStationId = seg.station_b_id;
         } else if (seg.station_b_id === currentStationId) {
           nextStationId = seg.station_a_id;
         } else {
-          return false; // Broken link: route is not continuous
+          return false; // broken link: route is not continuous
         }
 
-        // Rule: Line changes only at interchange stations
+        // rule:line changes only at interchange stations
         if (currentLineId !== null && currentLineId !== seg.line_id) {
           const currentStationObj = stations.find(s => s.id === currentStationId);
-          // SQLite might return 1/0 or true/false for booleans
           if (!currentStationObj || (currentStationObj.is_interchange !== 1 && currentStationObj.is_interchange !== true)) {
-            return false; // Illegal transfer!
+            return false; // illegal transfer
           }
         }
 

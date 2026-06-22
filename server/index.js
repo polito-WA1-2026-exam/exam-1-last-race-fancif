@@ -24,7 +24,7 @@ passport.use(new LocalStrategy(
     try {
       const user = await dao.getUser(username, password);
       if (!user) {
-        return done(null, false, { message: 'Username o password errati.' });
+        return done(null, false, { message: 'Wrong user or password.' });
       }
       return done(null, user);
     } catch (err) {
@@ -65,12 +65,11 @@ app.post('/api/sessions', function(req, res, next) {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
     if (!user) {
-      return res.status(401).json(info); // 401 Unauthorized se sbaglia credenziali
+      return res.status(401).json(info); // 401 Unauthorized 
     }
-    // req.login è fornito da Passport per creare la sessione
     req.login(user, (err) => {
       if (err) return next(err);
-      return res.json(req.user); // Ritorna l'utente loggato (senza password!)
+      return res.json(req.user); //without pw
     });
   })(req, res, next);
 });
@@ -80,7 +79,7 @@ app.get('/api/sessions/current', (req, res) => {
   if (req.isAuthenticated()) {
     res.status(200).json(req.user);
   } else {
-    res.status(401).json({ error: 'Utente non autenticato' });
+    res.status(401).json({ error: 'Utente not authenticated' });
   }
 });
 
@@ -97,7 +96,7 @@ const isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  return res.status(401).json({ error: 'Non autorizzato: devi fare il login' });
+  return res.status(401).json({ error: 'Not authorized: you must login' });
 };
 
 
@@ -108,7 +107,7 @@ app.get('/api/stations', isLoggedIn, async (req, res) => {
     const stations = await dao.getStations();
     res.json(stations);
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero delle stazioni' });
+    res.status(500).json({ error: 'Error retrieving stations' });
   }
 });
 
@@ -117,7 +116,7 @@ app.get('/api/lines', isLoggedIn, async (req, res) => {
     const lines = await dao.getLines();
     res.json(lines);
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero delle linee' });
+    res.status(500).json({ error: 'Error retrieving lines' });
   }
 });
 
@@ -126,7 +125,7 @@ app.get('/api/segments', isLoggedIn, async (req, res) => {
     const segments = await dao.getSegments();
     res.json(segments);
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero dei segmenti' });
+    res.status(500).json({ error: 'Error retrieving segments' });
   }
 });
 
@@ -135,7 +134,7 @@ app.get('/api/events', isLoggedIn, async (req, res) => {
     const events = await dao.getEvents();
     res.json(events);
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero degli eventi' });
+    res.status(500).json({ error: 'Error retrieving events' });
   }
 });
 
@@ -144,7 +143,7 @@ app.post('/api/games', isLoggedIn, async (req, res) => {
     const newGameId = await dao.saveGame(req.user.id, req.body.score);
     res.status(201).json({ id: newGameId });
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel salvataggio della partita' });
+    res.status(500).json({ error: 'Error saving match' });
   }
 });
 
@@ -153,7 +152,7 @@ app.get('/api/ranking', isLoggedIn, async (req, res) => {
     const ranking = await dao.getRanking();
     res.json(ranking);
   } catch (err) {
-    res.status(500).json({ error: 'Errore nel recupero della classifica' });
+    res.status(500).json({ error: 'Error retrieving ranking' });
   }
 });
 
